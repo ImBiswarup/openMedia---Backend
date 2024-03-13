@@ -1,52 +1,23 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
+const mongoose = require('mongoose');
+const userRoute = require('./routes/User');
+const router = require('./routes/User');
+
+const connectToDatabase = require('./DB/Connection');
+
+connectToDatabase('mongodb://127.0.0.1:27017/openMedia');
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(cors());
 
-mongoose.connect('mongodb://127.0.0.1:27017/openMedia', {
-})
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error(err));
-
-const userSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    name: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    password: {
-        type: String,
-        required: true,
-    }
-});
-const User = mongoose.model('User', userSchema);
-
-app.post('/api/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (!user || user.password !== password) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
-        return res
-        .json({ message: 'Login successful', user })
-        .redirect("/")
-        ;
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Internal server error' });
-    }
-});
+router.post('/api/users', userRoute)
+app.post('/api/signup', userRoute);
 
 // Register route
 // app.post('/api/register', async (req, res) => {
@@ -65,23 +36,39 @@ app.post('/api/login', async (req, res) => {
 // });
 
 // signup route
-app.post('/api/signup', async (req, res) => {
-    const { email, name, password } = req.body;
 
-    try {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Email already exists' });
-        }
-
-        const newUser = new User({ email, name, password });
-        await newUser.save();
-
-        res.status(201).json({ message: 'User created successfully' });
-    } catch (error) {
-        console.error('Error during signup:', error);
-        res.status(500).json({ message: 'Server error' });
+// Multer storage configuration
+const storage = multer.diskStorage({
+    destination: './uploads/',
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
+});
+
+// Multer upload configuration
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5000000 } 
+}).single('image');
+
+// Upload photo route
+app.post('/upload', (req, res) => {
+    upload(req, res, (err) => {
+        if (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Error uploading file' });
+        } else {
+            const newPost = new Post({
+                username: req.body.username,
+                desc: req.body.desc,
+                image: req.file.filename,
+                time: new Date()
+            });
+            newPost.save()
+                .then(() => res.status(201).json({ message: 'Post created successfully' }))
+                .catch(err => res.status(500).json({ error: 'Error saving post to database' }));
+        }
+    });
 });
 
 const PORT = process.env.PORT || 5000;
