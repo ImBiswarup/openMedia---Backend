@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const postSchema = mongoose.Schema({
     user: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: 'User',
         required: true
     },
@@ -10,7 +10,7 @@ const postSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    image: {
+    imageUrl: {
         type: String
     }
 }, 

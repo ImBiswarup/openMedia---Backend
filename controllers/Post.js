@@ -1,22 +1,25 @@
+// postController.js
+
 const Post = require('../models/Post');
 
 exports.uploadPost = (req, res) => {
-  let imagePath = '';
-  if (req.file) {
-    // If a file is included in the request, it's assumed to be an image upload
-    imagePath = req.file.path;
-  }
+    let imageUrl = '';
+    if (req.file) {
+        imageUrl = req.file
+    }
 
-  const { userId, content } = req.body;
-  
-  const newPost = new Post({ user: userId, content, image: imagePath });
-  newPost.save()
-    .then(post => {
-      res.json(post);
-    })
-    .catch(err => {
-      console.error(err);
-      res.status(500).json({ error: 'Failed to save post' });
-    });
+    const { user,content } = req.body; // Assuming user ID is obtained from authentication middleware
+
+    // Assuming user ID is obtained from authentication middleware
+    const userId = req.user;
+
+    const newPost = new Post({ user: userId, content, imageUrl });
+    newPost.save()
+        .then(post => {
+            res.json(post);
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).json({ error: 'Failed to save post' });
+        });
 };
-
