@@ -1,9 +1,7 @@
-const express = require('express');
-const router = express.Router();
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
-
-const signinHandler = async (req, res, next) => {
+const signupHandler = async (req, res) => {
     const { email, name, password } = req.body;
 
     try {
@@ -20,27 +18,40 @@ const signinHandler = async (req, res, next) => {
         console.error('Error during signup:', error);
         res.status(500).json({ message: 'Server error' });
     }
-}
+}; // Assuming User model is defined in a separate file
 
-const signupHandler = async (req, res) => {
-    const { email, name, password } = req.body;
+const logInHandler = async (req, res) => {
+    const { email, password } = req.body;
+
+    // Input validation
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+    }
 
     try {
+        // Find user by email
         const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Email already exists' });
+
+        // If user doesn't exist, return error
+        if (!existingUser) {
+            return res.status(404).json({ message: 'User not found' });
         }
 
-        const newUser = new User({ email, name, password });
-        await newUser.save();
+        // Compare passwords securely
+        const isPasswordValid = await bcrypt.compare(password, existingUser.password);
 
-        res.status(201).json({ message: 'User created successfully' }
-            // .redirect('/log-in')
-        );
+        // If password is invalid, return error
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        // Successful login
+        res.status(200).json({ message: 'Login successful' });
     } catch (error) {
-        console.error('Error during signup:', error);
+        console.error('Error during login:', error);
         res.status(500).json({ message: 'Server error' });
     }
-}
+};
 
-module.exports = { signinHandler, signupHandler };
+
+module.exports = { logInHandler, signupHandler };

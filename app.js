@@ -1,11 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const multer = require('multer');
-const path = require('path');
-const mongoose = require('mongoose');
 const userRoute = require('./routes/User');
-const router = require('./routes/User');
+const postRoute = require('./routes/Post')
 
 const connectToDatabase = require('./DB/Connection');
 
@@ -13,12 +10,22 @@ connectToDatabase('mongodb://127.0.0.1:27017/openMedia');
 
 const app = express();
 
+const PORT = process.env.PORT || 5000;
+
 app.use(bodyParser.json());
 app.use(cors());
+app.use(express.json());
 
-router.post('/api/users', userRoute)
-app.post('/api/signup', userRoute);
+app.use('/api', userRoute);
+app.use('/api/posts', postRoute);
 
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Internal Server Error' });
+  });
+  
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 // Register route
 // app.post('/api/register', async (req, res) => {
 //     try {
@@ -38,38 +45,36 @@ app.post('/api/signup', userRoute);
 // signup route
 
 // Multer storage configuration
-const storage = multer.diskStorage({
-    destination: './uploads/',
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
+// const storage = multer.diskStorage({
+//     destination: './uploads/',
+//     filename: function (req, file, cb) {
+//         cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+//     }
+// });
 
-// Multer upload configuration
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 5000000 } 
-}).single('image');
+// // Multer upload configuration
+// const upload = multer({
+//     storage: storage,
+//     limits: { fileSize: 5000000 } 
+// }).single('image');
 
-// Upload photo route
-app.post('/upload', (req, res) => {
-    upload(req, res, (err) => {
-        if (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Error uploading file' });
-        } else {
-            const newPost = new Post({
-                username: req.body.username,
-                desc: req.body.desc,
-                image: req.file.filename,
-                time: new Date()
-            });
-            newPost.save()
-                .then(() => res.status(201).json({ message: 'Post created successfully' }))
-                .catch(err => res.status(500).json({ error: 'Error saving post to database' }));
-        }
-    });
-});
+// // Upload photo route
+// app.post('/upload', (req, res) => {
+//     upload(req, res, (err) => {
+//         if (err) {
+//             console.error(err);
+//             res.status(500).json({ error: 'Error uploading file' });
+//         } else {
+//             const newPost = new Post({
+//                 username: req.body.username,
+//                 desc: req.body.desc,
+//                 image: req.file.filename,
+//                 time: new Date()
+//             });
+//             newPost.save()
+//                 .then(() => res.status(201).json({ message: 'Post created successfully' }))
+//                 .catch(err => res.status(500).json({ error: 'Error saving post to database' }));
+//         }
+//     });
+// });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
