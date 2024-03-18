@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const postSchema = mongoose.Schema({
-    user: {
+    createdBy: {
         type: String,
         ref: 'User',
         required: true
