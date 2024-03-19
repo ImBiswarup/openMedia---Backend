@@ -4,17 +4,15 @@ const postSchema = mongoose.Schema({
     createdBy: {
         type: String,
         ref: 'User',
-        required: true
     },
-    content: {
+    description: {
         type: String,
-        required: true
     },
     imageUrl: {
         type: String
     }
-}, 
-{ timestamps: true });
+},
+    { timestamps: true });
 
 const Post = mongoose.model('Post', postSchema);
 
