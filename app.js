@@ -5,7 +5,6 @@ const cookieParser = require('cookie-parser');
 
 const userRoute = require('./routes/User');
 const postRoute = require('./routes/Post')
-const { checkForAuthenticationCookies } = require('./middleware/authentication');
 
 const connectToDatabase = require('./DB/Connection');
 
@@ -20,7 +19,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(checkForAuthenticationCookies("token"));
 
 
 app.use('/api', userRoute);
