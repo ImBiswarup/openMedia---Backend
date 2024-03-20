@@ -1,22 +1,4 @@
 const Post = require('../models/Post');
-const multer = require('multer');
-const path = require('path');
-
-
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, path.resolve(`./uploads`));
-    },
-    filename: function (req, file, cb) {
-        const filename = `${Date.now()}-${file.originalname}`;
-        cb(null, filename);
-    },
-});
-
-const upload = multer({
-    storage: storage
-}).single('image');
 
 const uploadPost = async (req, res) => {
     try {
@@ -24,8 +6,11 @@ const uploadPost = async (req, res) => {
         if (req.file) {
             imageUrl = req.file.path;
         }
-
         const { createdBy, description } = req.body;
+
+        if (!description) {
+            return res.status(400).json({ error: 'Description cannot be empty' });
+        }
 
         const newPost = await Post.create({
             createdBy,
@@ -49,6 +34,41 @@ const getPosts = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch posts' });
     }
 };
+const createPost = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        const { description, imageUrl } = req.body;
+
+        if (!description) {
+            return res.status(400).json({ error: 'Description cannot be empty' });
+        }
+
+        const post = await Post.create({
+            createdBy: userId,
+            description,
+            imageUrl
+        });
+
+        res.status(201).json(post);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+        console.log(error.message);
+    }
+    console.log("user is",req.user)
+};
 
 
-module.exports = { uploadPost, upload, getPosts };
+
+const getPostsByUserId = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const posts = await Post.find({ createdBy: userId });
+        res.json(posts);
+    } catch (error) {
+        res.status(500).json({ error: 'Server Error' });
+    }
+};
+
+
+module.exports = { uploadPost, getPosts, createPost, getPostsByUserId };
