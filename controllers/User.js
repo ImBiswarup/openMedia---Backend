@@ -1,32 +1,25 @@
-// controllers/User.js
-
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 
-// Signup Handler
 const signupHandler = async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
     const newUser = await User.create({ username, email, password: hashedPassword });
 
-    res.status(201).json({ msg: 'User created successfully', user: newUser });
+    res.status(201).json({ msg: 'Signup successfull', user: newUser });
   } catch (error) {
     res.status(400).json({ msg: error })
   }
 };
 
-// Login Handler
 const loginHandler = async (req, res) => {
   const { email, password } = req.body;
 
