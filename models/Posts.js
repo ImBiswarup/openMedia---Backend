@@ -1,4 +1,5 @@
-const mongoose = require('mongoose')
+// post.js
+const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
     text: {
@@ -8,8 +9,12 @@ const postSchema = new mongoose.Schema({
     imageUrl: {
         type: String,
     },
-}, { timestamps: true })
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // Refers to the User model
+    }
+}, { timestamps: true });
 
-const Post = mongoose.model('Post', postSchema)
+const Post = mongoose.model('Post', postSchema);
 
 module.exports = Post;

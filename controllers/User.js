@@ -1,5 +1,7 @@
+const generateAuthToken = require('../middleware/generateToken');
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
+
 
 const signupHandler = async (req, res) => {
   const { username, email, password } = req.body;
@@ -14,11 +16,20 @@ const signupHandler = async (req, res) => {
 
     const newUser = await User.create({ username, email, password: hashedPassword });
 
-    res.status(201).json({ msg: 'Signup successfull', user: newUser });
+    const token = generateAuthToken(newUser);
+
+    res.cookie("token", token, {
+      withCredentials: true,
+      httpOnly: false,
+    });
+
+    res.status(201).json({ msg: 'Signup successful', user: newUser, token });
+
   } catch (error) {
     res.status(400).json({ msg: error })
   }
 };
+
 
 const loginHandler = async (req, res) => {
   const { email, password } = req.body;
@@ -34,10 +45,25 @@ const loginHandler = async (req, res) => {
       return res.status(401).json({ msg: 'Incorrect password' });
     }
 
-    res.status(200).json({ msg: 'Login successful' });
+    const token = generateAuthToken(user);
+
+    res.status(200).json({ msg: 'Login successful', token });
   } catch (error) {
     res.status(400).json({ msg: error })
   }
 };
 
-module.exports = { signupHandler, loginHandler };
+const getUsers = async (req, res) => {
+  try {
+    const users = await User.find({});
+    if (!users || users.length === 0) {
+      return res.status(404).json({ msg: 'No users found' });
+    }
+    res.status(200).json({ users });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+module.exports = { signupHandler, loginHandler, getUsers };
