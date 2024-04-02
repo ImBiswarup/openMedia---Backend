@@ -6,7 +6,7 @@ const authenticateToken = require("../auth/authMiddleware"); // Import the middl
 const router = Router();
 
 router.get('/', getPosts); // Apply the middleware to getPosts route
-router.post('/create-post', createPosts); // Apply the middleware to createPosts route
-router.get('/:postID', fetchPosts); // Apply the middleware to fetchPosts route
+router.post('/create-post', authenticateToken, createPosts); // Apply the middleware to createPosts route
+router.get('/:postID', authenticateToken, fetchPosts); // Apply the middleware to fetchPosts route
 
 module.exports = router;
