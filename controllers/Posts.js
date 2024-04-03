@@ -17,8 +17,7 @@ const createPosts = async (req, res) => {
     try {
         const posts = await Post.create({
             text: text,
-            // createdBy: req.user.id 
-            // Assuming you have authenticated the user and added their ID to req.user
+            createdBy: req.user.id 
         });
         res.status(200).json({ posts, msg: 'Post created successfully' });
     } catch (error) {

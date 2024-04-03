@@ -2,13 +2,12 @@ const generateAuthToken = require('../middleware/generateToken');
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 
-
 const signupHandler = async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
-    
+
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
@@ -57,7 +56,7 @@ const loginHandler = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const users = await User.find({});
-    if (!users || users.length === 0) {
+    if (!users) {
       return res.status(404).json({ msg: 'No users found' });
     }
     res.status(200).json({ users });

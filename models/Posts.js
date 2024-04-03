@@ -1,4 +1,3 @@
-// post.js
 const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
@@ -11,7 +10,8 @@ const postSchema = new mongoose.Schema({
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Refers to the User model
+        ref: 'User', 
+        required: true,
     }
 }, { timestamps: true });
 
