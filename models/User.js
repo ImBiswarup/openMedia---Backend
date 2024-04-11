@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
     salt: {
         type: String,
     },
+    token: {
+        type: String,
+        required: true,
+    }
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);

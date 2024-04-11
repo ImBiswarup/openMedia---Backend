@@ -4,24 +4,15 @@ const bcrypt = require('bcrypt');
 
 const signupHandler = async (req, res) => {
   const { username, email, password } = req.body;
-
   try {
     const existingUser = await User.findOne({ email });
-
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({ username, email, password: hashedPassword });
-
-    const token = generateAuthToken(newUser);
-
-    res.cookie("token", token, {
-      withCredentials: true,
-      httpOnly: false,
-    });
+    const token = generateAuthToken({ email: email, username: username });
+    const newUser = await User.create({ username, email, password: hashedPassword, token });
 
     res.status(201).json({ msg: 'Signup successful', user: newUser, token });
 
@@ -33,7 +24,6 @@ const signupHandler = async (req, res) => {
 
 const loginHandler = async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const user = await User.findOne({ email });
     if (!user) {
@@ -44,10 +34,7 @@ const loginHandler = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ msg: 'Incorrect password' });
     }
-
-    const token = generateAuthToken(user);
-
-    res.status(200).json({ msg: 'Login successful', token });
+    res.status(200).json({ msg: 'Login successful', user: user });
   } catch (error) {
     res.status(400).json({ msg: error })
   }
@@ -61,7 +48,6 @@ const getUsers = async (req, res) => {
     }
     res.status(200).json({ users });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };

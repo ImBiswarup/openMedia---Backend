@@ -25,11 +25,7 @@ const upload = multer({ storage: storage });
 
 router.get('/', getPosts);
 
-
-router.post('/uploads', upload.single('image'), createPosts);
-
-
-router.post('/create-post', createPosts);
+router.post('/uploads', upload.single('image'), authenticateToken, createPosts);
 
 router.get('/:postID', fetchPosts);
 

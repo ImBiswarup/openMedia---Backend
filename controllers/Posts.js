@@ -1,9 +1,11 @@
 const Post = require('../models/Posts');
+const User = require('../models/User');
 const cloudinary = require('cloudinary').v2;
+
 
 const getPosts = async (req, res) => {
     try {
-        const posts = await Post.find({}).populate('createdBy');
+        const posts = await Post.find({}).populate('createdBy')
         if (!posts) return res.status(401).json({ msg: 'No posts found' });
         res.status(200).json({ posts });
     } catch (err) {
@@ -16,6 +18,7 @@ const createPosts = async (req, res) => {
     try {
         const { text } = req.body;
         const imageFile = req.file;
+        const userID = await User.find({ email: req.user.email })
         if (!text) {
             return res.status(400).json({ msg: 'No text found, cannot post like that' });
         }
@@ -24,11 +27,15 @@ const createPosts = async (req, res) => {
             const cloudinaryResult = await cloudinary.uploader.upload(imageFile.path);
             imageUrl = cloudinaryResult.secure_url;
         }
+
         const newPost = await Post.create({
             text: text,
             imageUrl: imageUrl,
+            createdBy: userID[0]._id,
         });
-        console.log('New post created:', newPost);
+
+        // console.log('New post created:', newPost);
+
         res.status(201).json({ post: newPost, msg: 'Post created successfully' });
     } catch (error) {
         console.error('Error creating post:', error);
