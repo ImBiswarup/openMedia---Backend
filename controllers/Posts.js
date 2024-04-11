@@ -1,4 +1,5 @@
 const Post = require('../models/Posts');
+const cloudinary = require('cloudinary').v2;
 
 const getPosts = async (req, res) => {
     try {
@@ -12,19 +13,28 @@ const getPosts = async (req, res) => {
 }
 
 const createPosts = async (req, res) => {
-    const { text } = req.body
-    if (!text) return res.status(401).json({ msg: 'No text found, can not post like that' });
     try {
-        const posts = await Post.create({
+        const { text } = req.body;
+        const imageFile = req.file;
+        if (!text) {
+            return res.status(400).json({ msg: 'No text found, cannot post like that' });
+        }
+        let imageUrl = null;
+        if (imageFile) {
+            const cloudinaryResult = await cloudinary.uploader.upload(imageFile.path);
+            imageUrl = cloudinaryResult.secure_url;
+        }
+        const newPost = await Post.create({
             text: text,
-            createdBy: req.user.id 
+            imageUrl: imageUrl,
         });
-        res.status(200).json({ posts, msg: 'Post created successfully' });
+        console.log('New post created:', newPost);
+        res.status(201).json({ post: newPost, msg: 'Post created successfully' });
     } catch (error) {
-        console.error(error);
+        console.error('Error creating post:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-}
+};
 
 const fetchPosts = async (req, res) => {
     try {

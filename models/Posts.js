@@ -7,11 +7,13 @@ const postSchema = new mongoose.Schema({
     },
     imageUrl: {
         type: String,
+        required: true,
+        // default: 'https://res.cloudinary.com/djrdw0sqz/image/upload/v1712828061/ryayse1gpyhkhgm68czj.png',
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', 
-        required: true,
+        ref: 'User',
+        // required: true,
     }
 }, { timestamps: true });
 
