@@ -6,15 +6,15 @@ const { getPosts, fetchPosts, createPosts } = require('../controllers/Posts')
 const authenticateToken = require("../auth/authMiddleware");
 
 cloudinary.config({
-    cloud_name: 'djrdw0sqz',
-    api_key: '149555521257499',
-    api_secret: 'MZnJbgDDXV_noW9HI2NS7Y8BxfU',
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET,
 });
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './public/uploads');
-    },
+    // destination: function (req, file, cb) {
+    //     cb(null, './public/uploads');
+    // },
     filename: function (req, file, cb) {
         const filename = `${Date.now()}-${file.originalname}`;
         cb(null, filename);

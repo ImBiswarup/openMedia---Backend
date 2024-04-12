@@ -34,8 +34,6 @@ const createPosts = async (req, res) => {
             createdBy: userID[0]._id,
         });
 
-        // console.log('New post created:', newPost);
-
         res.status(201).json({ post: newPost, msg: 'Post created successfully' });
     } catch (error) {
         console.error('Error creating post:', error);
@@ -56,7 +54,6 @@ const fetchPosts = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
-
 
 module.exports = {
     getPosts, createPosts, fetchPosts
