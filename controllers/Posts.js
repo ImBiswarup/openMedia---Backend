@@ -19,6 +19,7 @@ const createPosts = async (req, res) => {
         const { text } = req.body;
         const imageFile = req.file;
         const userID = await User.find({ email: req.user.email })
+        
         if (!text) {
             return res.status(400).json({ msg: 'No text found, cannot post like that' });
         }
